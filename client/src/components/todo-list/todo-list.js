@@ -30,7 +30,7 @@ function TodoList() {
 
   const getCustomer = () => {
     axios
-      .get("http://localhost:8000/api/todo")
+      .get("http://localhost:8000/api/todo/get")
       .then((res) => {
         if (res.ok) {
           return res.json();
@@ -74,7 +74,7 @@ function TodoList() {
         name: input.customerName,
       };
       axios
-        .post("http://localhost:8000/api/todo-list/create", newCustomerList, {
+        .post("http://localhost:8000/api/todo/create", newCustomerList, {
           headers: {
             "Content-Type": "application/json",
           },

@@ -15,23 +15,13 @@ mongoose
   .then(() => console.log("Successfully MongoDB Connected..."))
   .catch((err) => console.log(err));
 
-app.get("/api/todo", async (req, res) => {
+app.get("/api/todo/get", async (req, res) => {
   const records = await Todo.find({});
   console.log("get todoList", records);
   res.json(records);
 });
 
-app.get("/api/todo/:id", (req, res) => {
-  let id = Number(req.params._id);
-  let product = Todo.find((product) => product.id === id);
-
-  if (!product) {
-    return res.status(404).send("todo not found");
-  }
-  res.json(product);
-});
-
-app.post("/api/todo-list/create", async (req, res) => {
+app.post("/api/todo/create", async (req, res) => {
   const record = req.body;
   console.log(record);
   const response = await Todo.create(record);
@@ -39,22 +29,61 @@ app.post("/api/todo-list/create", async (req, res) => {
   res.json({ status: "new customer created successfully" });
 });
 
-// app.delete("/api/delete/:id", async (req, res) => {
-//   let deleteTodo = req.params.id;
-//   console.log("deleteTodo", deleteTodo);
-//   await Todo.deleteOne({ _id: deleteTodo }, (err, data) => {
-//     if (err) {
-//       res.status(500),
-//         json({
-//           massage: " todo delete error",
-//         });
-//     } else {
-//       res.status(200).json({
-//         massage: " deleted todo successfully",
-//       });
-//     }
-//   });
-// });
+app.get("/api/todo/:id", (req, res) => {
+  const id = req.params.id;
+  Todo.findById(id)
+    .then((data) => {
+      if (!data)
+        res.status(404).send({ message: "Not found Tutorial with id " + id });
+      else res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: "Error retrieving todo with id=" + id });
+    });
+});
+
+app.put("/api/update/:id", (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to update can not be empty!",
+    });
+  }
+  const id = req.params.id;
+  Todo.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
+    .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          message: `Cannot update todo with id=${id}. Maybe todo was not found!`,
+        });
+      } else res.send({ message: "todo updated successfully." });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error updating todo with id=" + id,
+      });
+    });
+});
+
+app.delete("/api/delete/:id", (req, res) => {
+  const id = req.params.id;
+  Todo.findByIdAndRemove(id)
+    .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          message: `Cannot delete todo with id=${id}. Maybe todo was not found!`,
+        });
+      } else {
+        res.send({
+          message: "todo deleted successfully",
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Could not delete todo with id=" + id,
+      });
+    });
+});
 
 const port = 8000;
 
