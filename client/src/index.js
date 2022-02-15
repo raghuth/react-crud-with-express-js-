@@ -1,15 +1,20 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
+import { SnackbarProvider } from "notistack";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
 ReactDOM.render(
   <BrowserRouter>
-    <React.StrictMode>
+    <SnackbarProvider
+      maxSnack={10}
+      autoHideDuration={3000}
+      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+    >
       <App />
-    </React.StrictMode>
+    </SnackbarProvider>
   </BrowserRouter>,
   document.getElementById("root")
 );

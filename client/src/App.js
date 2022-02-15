@@ -1,25 +1,23 @@
 import * as React from "react";
 import "./App.css";
-import { Routes, Route, useParams } from "react-router-dom";
-import Home from "./components/home/home";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import TodoList from "./components/todo-list/todo-list";
 
 function App() {
-  function BlogPost() {
-    let { id } = useParams();
-    return <div style={{ fontSize: "50px" }}>Now showing post {id}</div>;
+  function Profile() {
+    // 'https://www.url.com/users/:userId'
+    const { userId } = useParams();
+    // user profile...
   }
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <Routes>
-          <Route path="/" element={<TodoList />} />
-          <Route path="/page/:id" element={<BlogPost />} />
-          {/* <Route path="/update-todo/:id" element={<TodoList />} /> */}
-        </Routes>
-      </header>
-    </div>
+    <>
+      <Routes>
+        <Route path="/" element={<Navigate replace to="/todo" />} />
+        <Route path="/todo" element={<TodoList />} />
+        <Route exact path="/edit/:id" element={<TodoList />} />
+        <Route exact path="/profile" element={<Profile />} />
+      </Routes>
+    </>
   );
 }
 

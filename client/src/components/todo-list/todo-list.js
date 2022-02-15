@@ -8,6 +8,7 @@ import {
   TextField,
   Button,
 } from "@material-ui/core";
+import { useSnackbar } from "notistack";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -16,21 +17,26 @@ import axios from "axios";
 import "./todo-list.css";
 
 function TodoList() {
-  //const { _id } = props.match.params;
-  let { _id } = useParams();
+  const todoID = useParams();
+  console.log("todoID", todoID.id);
   const [customers, setCustomers] = useState([]);
   const [input, setInput] = useState({
     customerName: "",
   });
-
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
+    if (todoID.id) {
+      console.log("todo edit");
+    } else {
+      console.log("todo list");
+    }
     getCustomer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getCustomer = () => {
     axios
-      .get("http://localhost:8000/api/todo/get")
+      .get("api/todo/get")
       .then((res) => {
         if (res.ok) {
           return res.json();
@@ -52,41 +58,37 @@ function TodoList() {
     });
   };
 
-  const deleteTodo = (e) => {
-    e.preventDefault();
+  const deleteTodo = (todoID) => {
     axios
-      .delete(`http://localhost:8000/api/delete/${_id}`)
+      .delete(`/api/delete/${todoID.id}`)
       .then((res) => {
-        console.log(res.data);
-        const deleteCustomer = customers.filter((item) => item._id !== _id);
-        setCustomers(deleteCustomer);
+        if (res.status === 200) {
+          alert("todo successfully deleted");
+          window.location.reload();
+        } else Promise.reject();
       })
-      .catch((error) => {
-        console.log(error.response.data.error);
-      });
+      .catch((err) => console.log("Something went wrong"));
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (input.customerName.trim().length === 0) return;
-    if (input.customerName) {
-      const newCustomerList = {
-        name: input.customerName,
-      };
-      axios
-        .post("http://localhost:8000/api/todo/create", newCustomerList, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then((data) => {
-          getCustomer();
-        })
-        .catch((error) => {
-          console.log(error.response.data.error);
-        });
-      input.customerName = "";
-    }
+    // if (input.customerName.trim().length === 0) return;
+    const newCustomerList = {
+      name: input.customerName,
+    };
+    axios
+      .post("api/todo/create", newCustomerList, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((data) => {
+        getCustomer();
+      })
+      .catch((error) => {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+      });
+    input.customerName = "";
   };
 
   return (
@@ -96,8 +98,8 @@ function TodoList() {
           <Card sx={{ maxWidth: 345 }}>
             <CardHeader
               avatar={<AccountBalanceIcon className="card-header-icon" />}
-              title="Endpoints"
-              subheader="Create and manage platform endpoints."
+              title="Customer"
+              subheader="Create and manage platform Customer."
               className="card-grid"
             />
             <CardContent></CardContent>
@@ -127,16 +129,20 @@ function TodoList() {
                 </form>
               </div>
               {customers?.map((data, i) => (
-                <div key={i} className="right-side-icons">
-                  {data.name}
-                  <Link className="edit-link" to={"/update-todo/" + _id}>
-                    <EditIcon className="point" />
-                  </Link>
-                  <DeleteIcon
-                    className="delete-icon point"
-                    onClick={(e) => deleteTodo(e)}
-                  />
-                </div>
+                <Grid container justifyContent="flex-end" key={i}>
+                  <Grid item xs={10}>
+                    {data.name}
+                  </Grid>
+                  <Grid item xs={2}>
+                    <Link className="edit-link m-r-20" to={`/edit/${data._id}`}>
+                      <EditIcon className="point" />
+                    </Link>
+                    <DeleteIcon
+                      className="delete-icon point"
+                      onClick={(data) => deleteTodo(todoID.id)}
+                    />
+                  </Grid>
+                </Grid>
               ))}
             </CardContent>
           </Card>

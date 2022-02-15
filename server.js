@@ -23,7 +23,11 @@ app.get("/api/todo/get", async (req, res) => {
 
 app.post("/api/todo/create", async (req, res) => {
   const record = req.body;
-  console.log(record);
+  if (record.name.trim().length === 0) {
+    return res.status(404).send({
+      message: "user value is empty!",
+    });
+  }
   const response = await Todo.create(record);
   console.log("created new todoList", response);
   res.json({ status: "new customer created successfully" });
@@ -42,7 +46,7 @@ app.get("/api/todo/:id", (req, res) => {
     });
 });
 
-app.put("/api/update/:id", (req, res) => {
+app.put("/api/edit/:id", (req, res) => {
   if (!req.body) {
     return res.status(400).send({
       message: "Data to update can not be empty!",
