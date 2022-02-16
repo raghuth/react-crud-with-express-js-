@@ -23,6 +23,10 @@ app.get("/api/todo/get", async (req, res) => {
 
 app.post("/api/todo/create", async (req, res) => {
   const record = req.body;
+  const user = await Todo.findOne({ name: record.name });
+  if (user) {
+    return res.status(409).send({ message: "username already exist" });
+  }
   if (record.name.trim().length === 0) {
     return res.status(404).send({
       message: "user value is empty!",
